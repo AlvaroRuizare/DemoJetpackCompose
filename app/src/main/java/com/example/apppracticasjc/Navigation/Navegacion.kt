@@ -7,8 +7,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.apppracticasjc.View.Login
 import com.example.apppracticasjc.View.Registro
-import com.example.apppracticasjc.ViewModel.LoginViewModel
-import com.example.apppracticasjc.ViewModel.RegistroViewModel
 
 
 // Aquí es donde se usa la librería de navegación que metemos en el build.gradle
@@ -23,12 +21,12 @@ fun Navegacion() {
     {
         composable(route = Pantallas.PantallaLogin.route) { // Indicamos ruta definida en Pantallas.kt
             // Enviamos instancia del LoginViewModel para que la View reciba datos del ViewModel
-            Login(navController, LoginViewModel()) // Indicamos Composable
+            Login(navController) // Indicamos Composable
         }
 
         composable(route = Pantallas.PantallaRegistro.route) {
             // Enviamos instancia del Registro ViewModel para que la View reciba datos del ViewModel
-            Registro(navController, RegistroViewModel())
+            Registro(navController)
         }
     }
 }

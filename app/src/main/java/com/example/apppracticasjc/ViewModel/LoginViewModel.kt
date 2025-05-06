@@ -2,16 +2,20 @@ package com.example.apppracticasjc.ViewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import com.example.apppracticasjc.Model.LoginUiState
+import com.example.apppracticasjc.Data.Model.LoginUiState
+import com.example.apppracticasjc.Data.RoomDB.UsuarioDao
 import com.example.apppracticasjc.Navigation.Pantallas
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class LoginViewModel : ViewModel(){
+class LoginViewModel(usuarioDao: UsuarioDao) : ViewModel(){
     private val _estadoPrivado = MutableStateFlow(LoginUiState())
     val estadoPublico : StateFlow<LoginUiState> = _estadoPrivado.asStateFlow()
+
+    private fun contrasenaValida(contrasena: String): Boolean = contrasena.length > 4
+    private fun usuarioValido(usuario: String): Boolean = usuario.length > 4
 
     // Función que se ejecuta cuando se pulsa el botón de login
     fun pulsarLogin(navController: NavController) {
@@ -22,10 +26,6 @@ class LoginViewModel : ViewModel(){
     fun navegarRegistro(navController: NavController) {
         navController.navigate(Pantallas.PantallaRegistro.route) // Se navega
     }
-
-    private fun contrasenaValida(contrasena: String): Boolean = contrasena.length > 4
-
-    private fun usuarioValido(usuario: String): Boolean = usuario.length > 4
 
 
     // Al modificar alguno de los campos...

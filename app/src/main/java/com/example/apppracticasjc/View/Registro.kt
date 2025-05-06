@@ -11,12 +11,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.apppracticasjc.Data.RoomDB.BaseDatos
 import com.example.apppracticasjc.ViewModel.RegistroViewModel
+import com.example.apppracticasjc.ViewModel.RegistroViewModelFactory
 
 @Composable
-fun Registro(navController: NavHostController, registroViewModel: RegistroViewModel) {
+fun Registro(navController: NavHostController) {
+    val context = LocalContext.current
+    val registroViewModel : RegistroViewModel = viewModel(
+        factory = RegistroViewModelFactory(BaseDatos.getDatabase(context).usuarioDao())
+    )
     val registroUiState by registroViewModel.estadoPublico.collectAsState()
 
     Column(
@@ -39,7 +47,7 @@ fun Registro(navController: NavHostController, registroViewModel: RegistroViewMo
                     registroUiState.valorCampoCorreo,
                     registroUiState.valorCampoFecha,
                     registroUiState.valorCampoTipo
-            )},
+            )}, // Función al editar
             registroUiState.valorCampoUsuario
         )
 
@@ -52,7 +60,7 @@ fun Registro(navController: NavHostController, registroViewModel: RegistroViewMo
                 registroUiState.valorCampoCorreo,
                 registroUiState.valorCampoFecha,
                 registroUiState.valorCampoTipo
-            )},
+            )}, // Función al editar
             registroUiState.valorCampoContrasena
         )
 
@@ -65,7 +73,7 @@ fun Registro(navController: NavHostController, registroViewModel: RegistroViewMo
                 registroUiState.valorCampoCorreo,
                 registroUiState.valorCampoFecha,
                 registroUiState.valorCampoTipo
-            )},
+            )}, // Función al editar
             registroUiState.valorCampoContrasena2
         )
 
@@ -78,7 +86,7 @@ fun Registro(navController: NavHostController, registroViewModel: RegistroViewMo
                 it,
                 registroUiState.valorCampoFecha,
                 registroUiState.valorCampoTipo
-            )},
+            )}, // Función al editar
             registroUiState.valorCampoCorreo
         )
 
@@ -91,7 +99,7 @@ fun Registro(navController: NavHostController, registroViewModel: RegistroViewMo
                 registroUiState.valorCampoCorreo,
                 it,
                 registroUiState.valorCampoTipo
-            )},
+            )}, // Función al editar
             registroUiState.valorCampoFecha
         )
 
@@ -104,11 +112,19 @@ fun Registro(navController: NavHostController, registroViewModel: RegistroViewMo
                 registroUiState.valorCampoCorreo,
                 registroUiState.valorCampoFecha,
                 it,
-            )},
+            )}, // Función al editar
             registroUiState.valorCampoTipo
         )
 
-        TextoBoton("Ya tengo cuenta", {registroViewModel.navegarLogin(navController)})
-        BotonSiguiente("Iniciar sesión", {registroViewModel.pulsarLogin(navController)}, registroUiState.botonHabilitado)
+        TextoBoton(
+            "Ya tengo cuenta",
+            {registroViewModel.navegarLogin(navController)} // Función al pulsar texto
+        )
+
+        BotonSiguiente(
+            "Crear cuenta",
+            {registroViewModel.pulsarCrearCuenta(navController)}, // Función al pulsar botón
+            registroUiState.botonHabilitado
+        )
     }
 }

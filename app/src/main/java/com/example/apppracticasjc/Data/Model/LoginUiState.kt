@@ -1,4 +1,4 @@
-package com.example.apppracticasjc.Model
+package com.example.apppracticasjc.Data.Model
 
 data class LoginUiState(
     var valorCampoUsuario : String = "",
