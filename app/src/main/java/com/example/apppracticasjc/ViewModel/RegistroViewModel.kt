@@ -2,15 +2,19 @@ package com.example.apppracticasjc.ViewModel
 
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.example.apppracticasjc.Model.RegistroUiState
+import com.example.apppracticasjc.Data.Model.RegistroUiState
+import com.example.apppracticasjc.Data.RoomDB.UsuarioDao
+import com.example.apppracticasjc.Data.RoomDB.UsuarioEntity
 import com.example.apppracticasjc.Navigation.Pantallas
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class RegistroViewModel : ViewModel() {
+class RegistroViewModel(private val usuarioDao: UsuarioDao) : ViewModel() {
     private val _estadoPrivado = MutableStateFlow(RegistroUiState())
     val estadoPublico : StateFlow<RegistroUiState> = _estadoPrivado.asStateFlow()
 
@@ -19,10 +23,22 @@ class RegistroViewModel : ViewModel() {
     private fun emailValido(email: String): Boolean = Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
 
+    // Al pulsar el botón de crear cuenta...
+    fun pulsarCrearCuenta(navController: NavController) {
+        viewModelScope.launch {
+            usuarioDao.insert(
+                UsuarioEntity(
+                    0,
+                    _estadoPrivado.value.valorCampoUsuario,
+                    _estadoPrivado.value.valorCampoContrasena,
+                    _estadoPrivado.value.valorCampoCorreo,
+                    _estadoPrivado.value.valorCampoFecha,
+                    tipoUsuarioInt(_estadoPrivado.value.valorCampoTipo)
+                )
+            )
+        }
 
-    // Al pulsar el botón de login...
-    fun pulsarLogin(navController: NavController) {
-        navController.navigate(Pantallas.PantallaLogin.route) // Se navega
+        navegarLogin(navController)
     }
 
     // Navegar hacia el login
@@ -54,6 +70,18 @@ class RegistroViewModel : ViewModel() {
         }
     }
 
+    // Recibe tipoUsuario en String y devuelve tipoUsuario en Int
+    fun tipoUsuarioInt(cadenaRecibida : String) : Int {
+        var usuarioDevolver = 0
+
+        if (cadenaRecibida == "Usuario"){
+            usuarioDevolver = 1
+        } else if (cadenaRecibida == "Administrador") {
+            usuarioDevolver = 2
+        }
+
+        return usuarioDevolver
+    }
 
     /**
      * Comprobar si los campos son válidos

@@ -19,18 +19,26 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.apppracticasjc.Data.RoomDB.BaseDatos
 import com.example.apppracticasjc.R
 import com.example.apppracticasjc.ViewModel.LoginViewModel
+import com.example.apppracticasjc.ViewModel.LoginViewModelFactory
+
 
 @Composable
-fun Login(navController: NavHostController, loginViewModel : LoginViewModel) {
+fun Login(navController: NavHostController) {
+    val context = LocalContext.current
+    val loginViewModel : LoginViewModel = viewModel(
+        factory = LoginViewModelFactory(BaseDatos.getDatabase(context).usuarioDao())
+    )
     val loginUiState by loginViewModel.estadoPublico.collectAsState()
-
 
     Column(
         modifier = Modifier.padding(top = 50.dp, start = 10.dp, end = 10.dp).fillMaxSize(),
