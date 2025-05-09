@@ -50,9 +50,6 @@ import com.example.apppracticasjc.Data.Model.LocalSnackbarHostState
 import com.example.apppracticasjc.Data.RoomDB.BaseDatos
 import com.example.apppracticasjc.ViewModel.RegistroViewModel
 import com.example.apppracticasjc.ViewModel.RegistroViewModelFactory
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Composable
 fun Registro(navController: NavHostController) {
