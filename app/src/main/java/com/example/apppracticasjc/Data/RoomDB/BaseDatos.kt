@@ -5,9 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [UsuarioEntity::class], version = 1, exportSchema = false)
+@Database(entities = [UsuarioEntity::class, TipoUsuarioEntity::class], version = 2, exportSchema = false)
 abstract class BaseDatos : RoomDatabase() {
-    abstract fun usuarioDao(): UsuarioDao // Para que la BD tenga el DAO
+    // Para que la BD tenga los DAO
+    abstract fun usuarioDao(): UsuarioDao
+    abstract fun tipoUsuarioDao(): TipoUsuarioDao
 
     // Permite el acceso a los métodos de la clase (que estén dentro de los corchetes del companion object) sin crear un objeto
     // Por ejemplo (BaseDatos.funcion())

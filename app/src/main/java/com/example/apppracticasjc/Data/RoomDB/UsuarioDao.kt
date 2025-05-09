@@ -24,6 +24,23 @@ interface UsuarioDao {
     @Query("SELECT * from usuarios WHERE id = :id")
     fun getUsuario(id: Int): Flow<UsuarioEntity>
 
-    @Query("SELECT * from usuarios ORDER BY nombre ASC")
+    @Query("SELECT * from usuarios")
     fun getAllUsuarios(): Flow<List<UsuarioEntity>>
+
+    @Query("""
+        SELECT * from usuarios 
+        WHERE 
+            nombre = :nombreRecibido and
+            contrasena = :contrasenaRecibida""")
+    suspend fun getUsuarioContrasena(nombreRecibido : String, contrasenaRecibida : String): UsuarioEntity?
+
+    @Query("""
+        SELECT nombre from usuarios 
+        WHERE nombre = :nombreRecibido""")
+    suspend fun getExisteNombre(nombreRecibido : String): String?
+
+    @Query("""
+        SELECT correo from usuarios 
+        WHERE correo = :correoRecibido""")
+    suspend fun getExisteCorreo(correoRecibido : String): String?
 }

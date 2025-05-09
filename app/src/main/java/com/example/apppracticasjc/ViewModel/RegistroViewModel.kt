@@ -5,48 +5,140 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.apppracticasjc.Data.Model.RegistroUiState
+import com.example.apppracticasjc.Data.RoomDB.TipoUsuarioDao
 import com.example.apppracticasjc.Data.RoomDB.UsuarioDao
 import com.example.apppracticasjc.Data.RoomDB.UsuarioEntity
 import com.example.apppracticasjc.Navigation.Pantallas
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-class RegistroViewModel(private val usuarioDao: UsuarioDao) : ViewModel() {
+class RegistroViewModel(private val usuarioDao: UsuarioDao, private val tipoUsuarioDao: TipoUsuarioDao) : ViewModel() {
     private val _estadoPrivado = MutableStateFlow(RegistroUiState())
     val estadoPublico : StateFlow<RegistroUiState> = _estadoPrivado.asStateFlow()
 
+    // Eventos para el Snackbar
+    private val _eventosUI = MutableSharedFlow<String>()
+    val eventosUI = _eventosUI.asSharedFlow()
+
+    /**
+     * Al iniciar el ViewModel...
+     */
+    init {
+        viewModelScope.launch {
+            _estadoPrivado.update { estadoActual ->
+                estadoActual.copy(
+                    listaTiposUsuario = tipoUsuarioDao.getAllTiposUsuario()
+                )
+            }
+        }
+    }
+
+
+    // Funciones pequeñas
     private fun usuarioValido(usuario: String): Boolean = usuario.length > 4
     private fun contrasenaValida(contrasena: String): Boolean = contrasena.length > 4
     private fun emailValido(email: String): Boolean = Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    fun navegarLogin(navController: NavController) = navController.navigate(Pantallas.PantallaLogin.route) // Se navega
 
 
-    // Al pulsar el botón de crear cuenta...
-    fun pulsarCrearCuenta(navController: NavController) {
+    /**
+     * Al pulsar botón de crear cuenta...
+     */
+    fun pulsarCrearCuenta() {
         viewModelScope.launch {
-            usuarioDao.insert(
-                UsuarioEntity(
-                    0,
+            if(!camposValidos(
                     _estadoPrivado.value.valorCampoUsuario,
                     _estadoPrivado.value.valorCampoContrasena,
+                    _estadoPrivado.value.valorCampoContrasena2,
                     _estadoPrivado.value.valorCampoCorreo,
                     _estadoPrivado.value.valorCampoFecha,
-                    tipoUsuarioInt(_estadoPrivado.value.valorCampoTipo)
+                    _estadoPrivado.value.valorTipoUsuario
+            )){
+                _estadoPrivado.update { estadoActual ->
+                    estadoActual.copy(
+                        textoError = "Alguno de los campos no es válido"
+                    )
+                }
+            } else if(yaExisteNombre(_estadoPrivado.value.valorCampoUsuario)) {
+                _estadoPrivado.update { estadoActual ->
+                    estadoActual.copy(
+                        textoError = "El nombre del usuario ya existe en BD"
+                    )
+                }
+            } else if(yaExisteCorreo(_estadoPrivado.value.valorCampoCorreo)) {
+                _estadoPrivado.update { estadoActual ->
+                    estadoActual.copy(
+                        textoError = "El correo del usuario ya existe en BD"
+                    )
+                }
+            } else {
+                usuarioDao.insert(
+                    UsuarioEntity(
+                        0,
+                        _estadoPrivado.value.valorCampoUsuario,
+                        _estadoPrivado.value.valorCampoContrasena,
+                        _estadoPrivado.value.valorCampoCorreo,
+                        _estadoPrivado.value.valorCampoFecha,
+                        tipoUsuarioAInt(_estadoPrivado.value.valorTipoUsuario)
+                    )
                 )
-            )
+                mostrarSnackbar("Usuario " + _estadoPrivado.value.valorCampoUsuario + " creado correctamente")
+            }
         }
 
-        navegarLogin(navController)
+
     }
 
-    // Navegar hacia el login
-    fun navegarLogin(navController: NavController) {
-        navController.navigate(Pantallas.PantallaLogin.route) // Se navega
+
+    private suspend fun yaExisteNombre(nombreRecibido: String): Boolean {
+        var yaExiste = false
+        var nombreBD : String? = null
+
+        nombreBD = usuarioDao.getExisteNombre(nombreRecibido)
+
+        if (nombreBD != null){
+            yaExiste = true
+        }
+
+        return yaExiste
     }
 
-    // Función que se ejecuta al modificar el Registro
+
+    private suspend fun yaExisteCorreo(correoRecibido: String): Boolean {
+        var yaExiste = false
+        var correoBD : String? = null
+
+        correoBD = usuarioDao.getExisteCorreo(correoRecibido)
+
+        if (correoBD != null){
+            yaExiste = true
+        }
+
+        return yaExiste
+    }
+
+
+    /**
+     * Mostrar el snackbar
+     */
+    fun mostrarSnackbar(mensaje: String) {
+        viewModelScope.launch {
+            _eventosUI.emit(mensaje)
+        }
+    }
+
+
+    /**
+     * Al escribir en el formulario de registro...
+     */
     fun alEditarRegistro(usuario: String, contrasena1: String, contrasena2: String, email: String, fecha: String, tipoUsuario: String) {
         _estadoPrivado.update { estadoActual -> // Se actualizan todos los datos dinámicamente
             estadoActual.copy(
@@ -55,7 +147,7 @@ class RegistroViewModel(private val usuarioDao: UsuarioDao) : ViewModel() {
                 valorCampoContrasena2 = contrasena2,
                 valorCampoCorreo = email,
                 valorCampoFecha = fecha,
-                valorCampoTipo = tipoUsuario
+                valorTipoUsuario = tipoUsuario
             )
         }
 
@@ -70,8 +162,11 @@ class RegistroViewModel(private val usuarioDao: UsuarioDao) : ViewModel() {
         }
     }
 
-    // Recibe tipoUsuario en String y devuelve tipoUsuario en Int
-    fun tipoUsuarioInt(cadenaRecibida : String) : Int {
+
+    /**
+     * Convertir tipo usuario de string a int
+     */
+    fun tipoUsuarioAInt(cadenaRecibida : String) : Int {
         var usuarioDevolver = 0
 
         if (cadenaRecibida == "Usuario"){
@@ -82,6 +177,7 @@ class RegistroViewModel(private val usuarioDao: UsuarioDao) : ViewModel() {
 
         return usuarioDevolver
     }
+
 
     /**
      * Comprobar si los campos son válidos
@@ -135,5 +231,14 @@ class RegistroViewModel(private val usuarioDao: UsuarioDao) : ViewModel() {
         }
 
         return todoValido
+    }
+
+
+    /**
+     * Convierte milisegundos en Fecha
+     */
+    fun milisegundosAFecha(millis: Long): String {
+        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        return formatter.format(Date(millis))
     }
 }
