@@ -97,6 +97,9 @@ fun Login(navController: NavHostController) {
             loginUiState.botonHabilitado
         )
     }
+
+    // PARA INICIAR SESION AUTOMATICAMENTE
+    loginViewModel.pulsarLogin(navController)
 }
 
 @Composable

@@ -89,8 +89,12 @@ class LoginViewModel(private val usuarioDao: UsuarioDao, private val tiposUsuari
     fun pulsarLogin(navController: NavController) {
         viewModelScope.launch {
             if (credencialesCorrectas(
-                _estadoPrivado.value.valorCampoUsuario.trim(),
-                _estadoPrivado.value.valorCampoContrasena.trim(),
+                //_estadoPrivado.value.valorCampoUsuario.trim(),
+                //_estadoPrivado.value.valorCampoContrasena.trim(),
+
+                // PARA INICIAR SESION AUTOMATICAMENTE
+                "admin",
+                "admin"
             )){
                 navController.navigate(Pantallas.PantallaListado.route)
             } else {
