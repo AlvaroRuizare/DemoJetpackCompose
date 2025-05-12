@@ -1,5 +1,7 @@
 package com.example.apppracticasjc.View
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -24,6 +26,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -50,6 +53,7 @@ import com.example.apppracticasjc.Data.Model.LocalSnackbarHostState
 import com.example.apppracticasjc.Data.RoomDB.BaseDatos
 import com.example.apppracticasjc.ViewModel.RegistroViewModel
 import com.example.apppracticasjc.ViewModel.RegistroViewModelFactory
+import java.time.LocalDate
 
 @Composable
 fun Registro(navController: NavHostController) {
@@ -241,13 +245,26 @@ fun CampoDatePicker(
     }
 }
 
+// Objeto que utiliza el datepicker para no permitir fechas futuras
+@OptIn(ExperimentalMaterial3Api::class)
+object FechasPasadasOPresente: SelectableDates {
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+        return utcTimeMillis <= System.currentTimeMillis()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun isSelectableYear(year: Int): Boolean {
+        return year <= LocalDate.now().year
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerCalendario(
     funcionSeleccionar: (Long?) -> Unit,
     funcionSalir: () -> Unit
 ) {
-    val datePickerState = rememberDatePickerState()
+    val datePickerState = rememberDatePickerState(selectableDates = FechasPasadasOPresente)
 
     DatePickerDialog(
         onDismissRequest = funcionSalir,
