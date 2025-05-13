@@ -1,7 +1,17 @@
 package com.example.apppracticasjc.View
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -17,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -39,34 +50,85 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import coil.compose.rememberImagePainter
 import com.example.apppracticasjc.Data.Model.LocalSnackbarHostState
 import com.example.apppracticasjc.Data.RoomDB.BaseDatos
+import com.example.apppracticasjc.R
 import com.example.apppracticasjc.ViewModel.RegistroViewModel
 import com.example.apppracticasjc.ViewModel.RegistroViewModelFactory
+import java.io.File
+import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.util.Date
+import java.util.Objects
 
+@RequiresApi(Build.VERSION_CODES.P)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Registro(navController: NavHostController) {
-    val context = LocalContext.current
+    val contexto = LocalContext.current
     val registroViewModel : RegistroViewModel = viewModel( // ViewModel global que sobrevive a cambios de configuracion
         factory = RegistroViewModelFactory(
-            BaseDatos.getDatabase(context).usuarioDao(),
-            BaseDatos.getDatabase(context).tipoUsuarioDao()
+            BaseDatos.getDatabase(contexto).usuarioDao(),
+            BaseDatos.getDatabase(contexto).tipoUsuarioDao()
         )
     )
     val registroUiState by registroViewModel.estadoPublico.collectAsState()
     val snackbarHostState = LocalSnackbarHostState.current
 
+    registroUiState.fotoSeleccionada = BitmapFactory.decodeResource(contexto.getResources(),R.drawable.login).asImageBitmap()
+
+    // VARIABLES CÁMARA
+    val file = contexto.createImageFile() // Archivo temporal donde se guarda la foto de la cámara
+    val uri = FileProvider.getUriForFile( // Obtiene la uri del archivo usando FileProvider
+        Objects.requireNonNull(contexto), // contexto
+        contexto.packageName + ".provider", // provider especificado en el manifest
+        file // archivo temporal
+    )
+
+    // Se define URI como estado
+    var uriTemporal by remember {
+        mutableStateOf<Uri>(Uri.EMPTY)
+    }
+
+    // LAUNCHER CÁMARA
+    val cameraLauncher = rememberLauncherForActivityResult( // Se prepara la cámara para ejecutarla luego
+        ActivityResultContracts.TakePicture()
+    ) {
+        // Despues de echar foto...
+        uriTemporal = uri // Se actualiza la uri
+    }
+
+    // LAUNCHER PERMISOS
+    val permissionLauncher = rememberLauncherForActivityResult( // Se prepara el dialogo de permisos para pedirlo luego
+        ActivityResultContracts.RequestPermission()
+    ) {
+        // Después de pedir permisos...
+        if (it) { // Si se han aceptado...
+            Toast.makeText(contexto, "Permission Granted", Toast.LENGTH_SHORT).show()
+            cameraLauncher.launch(uri) // Se lanza cámara
+        } else { // Si no se han aceptado...
+            Toast.makeText(contexto, "Permission Denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // al cargar el registro, prepara el snackbar
     LaunchedEffect(Unit) {
         registroViewModel.eventosUI.collect { mensaje ->
             snackbarHostState.showSnackbar(mensaje)
@@ -81,7 +143,13 @@ fun Registro(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        ImagenLogo()
+
+        registroUiState.fotoSeleccionada?.let { fotoNoNull ->
+            FotoPerfil(
+                Modifier.clickable { registroViewModel.abrirMenuTipoFoto() },
+                fotoNoNull
+            )
+        }
         Spacer(modifier = Modifier.height(10.dp))
 
         TextoErrorLogin(registroUiState.textoError)
@@ -192,7 +260,86 @@ fun Registro(navController: NavHostController) {
         )
     }
 
+    // Si la uri tiene datos...
+    if (uriTemporal.path?.isNotEmpty() == true) {
+        // Imagen URI
+        Image(
+            modifier = Modifier
+                .padding(16.dp, 8.dp),
+            painter = rememberImagePainter(uriTemporal),
+            contentDescription = null
+        )
+    } else { // Si la uri está vacía
+        // Imagen normal
+        Image(
+            modifier = Modifier
+                .padding(16.dp, 8.dp),
+            painter = painterResource(id = R.drawable.login),
+            contentDescription = null
+        )
+    }
+
+    if (registroUiState.mostrarAlertDialog){
+        AlertDialog(
+            onDismissRequest = { registroViewModel.cerrarDialogo() },
+            title = { Text("Seleccionar imagen") },
+            text = { Text("¿Desde dónde quieres obtener la imagen?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    registroViewModel.elegirCamara()
+
+                    // Comprobar permisos
+                    val resultadoPermisos = ContextCompat.checkSelfPermission(
+                        contexto,
+                        Manifest.permission.CAMERA
+                    )
+
+                    // Si ha aceptado permisos...
+                    if (resultadoPermisos == PackageManager.PERMISSION_GRANTED) {
+                        cameraLauncher.launch(uri) // Se lanza la cámara
+                    } else { // Si no ha aceptado permisos...
+                        permissionLauncher.launch(Manifest.permission.CAMERA) // Se piden permisos
+                    }
+                }) {
+                    Text("Cámara")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    //registroViewModel.elegirGaleria()
+
+                }) {
+                    Text("Galería")
+                }
+            },
+        )
+    }
 }
+
+
+fun Context.createImageFile(): File {
+    val timeStamp = SimpleDateFormat("yyyy_MM_dd_HH:mm:ss").format(Date())
+    val imageFileName = "JPEG_" + timeStamp + "_"
+    val image = File.createTempFile(
+        imageFileName,
+        ".jpg",
+        externalCacheDir
+    )
+
+    return image
+}
+
+
+@Composable
+fun FotoPerfil(modifier: Modifier, fotoPerfl : ImageBitmap) {
+    Image(
+        modifier = modifier,
+        bitmap = fotoPerfl,
+        contentDescription = "Foto de perfil",
+        contentScale = ContentScale.FillWidth
+    )
+}
+
 
 @Composable
 fun CampoDatePicker(
