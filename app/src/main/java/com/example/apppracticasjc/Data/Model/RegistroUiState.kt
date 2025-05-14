@@ -1,9 +1,8 @@
 package com.example.apppracticasjc.Data.Model
 
 import android.net.Uri
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.focus.FocusState
-import androidx.compose.ui.graphics.ImageBitmap
+import com.example.apppracticasjc.R
 
 data class RegistroUiState(
     var valorCampoUsuario : String = "",
@@ -22,8 +21,6 @@ data class RegistroUiState(
     var focoCampoFecha : FocusState? = null,
 
     // FOTOS
-    var mostrarAlertDialog : Boolean = false,
-    var uriTemporal: Uri = Uri.EMPTY,
-    var fotoSeleccionada : ImageBitmap? = null,
-    var origenFoto : String = "Ninguno"
+    var uriFotoPerfil: Uri? = Uri.EMPTY,
+    val painterPerfil: Int = R.drawable.login
 )

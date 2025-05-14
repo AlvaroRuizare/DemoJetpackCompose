@@ -1,6 +1,8 @@
 package com.example.apppracticasjc.Navigation
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,6 +13,7 @@ import com.example.apppracticasjc.View.Registro
 
 // Aquí es donde se gestiona la navegación
 
+@RequiresApi(Build.VERSION_CODES.P)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun Navegacion() {

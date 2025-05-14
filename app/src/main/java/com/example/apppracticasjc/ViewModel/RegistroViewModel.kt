@@ -1,6 +1,6 @@
 package com.example.apppracticasjc.ViewModel
 
-import android.content.Context
+import android.net.Uri
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,8 +25,9 @@ class RegistroViewModel(
     private val usuarioDao: UsuarioDao,
     private val tipoUsuarioDao: TipoUsuarioDao
 ) : ViewModel() {
+
     private val _estadoPrivado = MutableStateFlow(RegistroUiState())
-    val estadoPublico : StateFlow<RegistroUiState> = _estadoPrivado.asStateFlow()
+    val estadoPublico: StateFlow<RegistroUiState> = _estadoPrivado.asStateFlow()
 
     // Eventos para el Snackbar
     private val _eventosUI = MutableSharedFlow<String>()
@@ -100,12 +101,13 @@ class RegistroViewModel(
         }
     }
 
-
+    /**
+     * Comprobar si ya existe nombre en BD
+     */
     private suspend fun yaExisteNombre(nombreRecibido: String): Boolean {
         var yaExiste = false
-        var nombreBD : String? = null
 
-        nombreBD = usuarioDao.getExisteNombre(nombreRecibido)
+        val nombreBD : String? = usuarioDao.getExisteNombre(nombreRecibido)
 
         if (nombreBD != null){
             yaExiste = true
@@ -115,11 +117,13 @@ class RegistroViewModel(
     }
 
 
+    /**
+     * Comprobar si ya existe correo en BD
+     */
     private suspend fun yaExisteCorreo(correoRecibido: String): Boolean {
         var yaExiste = false
-        var correoBD : String? = null
 
-        correoBD = usuarioDao.getExisteCorreo(correoRecibido)
+        val correoBD : String? = usuarioDao.getExisteCorreo(correoRecibido)
 
         if (correoBD != null){
             yaExiste = true
@@ -247,52 +251,12 @@ class RegistroViewModel(
 
 
     /**
-     * FOTOS - Al pulsar la foto...
+     * Actualizar la uri de la foto de perfil al elegir imagen
      */
-    fun abrirMenuTipoFoto() {
-        mostrarSnackbar("foto pulsada")
+    fun actualizarUri(uri: Uri?) {
         _estadoPrivado.update { estadoActual ->
             estadoActual.copy(
-                mostrarAlertDialog = true
-            )
-        }
-    }
-
-
-    /**
-     * FOTOS - Al elegir galería...
-     */
-    fun elegirGaleria() {
-        mostrarSnackbar("galeria pulsada")
-        _estadoPrivado.update { estadoActual ->
-            estadoActual.copy(
-                mostrarAlertDialog = false
-            )
-        }
-    }
-
-
-    /**
-     * FOTOS - Al elegir cámara...
-     */
-    fun elegirCamara() {
-        mostrarSnackbar("camara pulsada")
-        _estadoPrivado.update { estadoActual ->
-            estadoActual.copy(
-                mostrarAlertDialog = false
-            )
-        }
-    }
-
-
-    /**
-     * FOTOS - Al cerrar el dialog...
-     */
-    fun cerrarDialogo() {
-        mostrarSnackbar("dialogo cerrado")
-        _estadoPrivado.update { estadoActual ->
-            estadoActual.copy(
-                mostrarAlertDialog = false
+                uriFotoPerfil = uri
             )
         }
     }
