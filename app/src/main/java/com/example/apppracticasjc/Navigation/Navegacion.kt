@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.apppracticasjc.View.CarouselGaleria
 import com.example.apppracticasjc.View.Listado
 import com.example.apppracticasjc.View.Login
 import com.example.apppracticasjc.View.Registro
@@ -32,7 +33,11 @@ fun Navegacion() {
         }
 
         composable(route = Pantallas.PantallaListado.route) {
-            Listado(navController, {  })
+            Listado(navController)
+        }
+
+        composable(route = Pantallas.PantallaCarouselGaleria.route) {
+            CarouselGaleria()
         }
     }
 }

@@ -5,4 +5,5 @@ sealed class Pantallas(val route : String) { // Clase que recibe parámetro ruta
     object PantallaLogin : Pantallas("pantalla_login")
     object PantallaRegistro : Pantallas("pantalla_registro")
     object PantallaListado : Pantallas("pantalla_listado")
+    object PantallaCarouselGaleria : Pantallas("pantalla_carousel_galeria")
 }

@@ -17,7 +17,7 @@ import com.example.apppracticasjc.ViewModel.ListadoViewModel
 import com.example.apppracticasjc.ViewModel.ListadoViewModelFactory
 
 @Composable
-fun Listado(navController: NavHostController, navegarAUsuario: (UsuarioEntity) -> Unit) {
+fun Listado(navController: NavHostController) {
     val context = LocalContext.current
     val listadoViewModel : ListadoViewModel = viewModel( // ViewModel global que sobrevive a cambios de configuracion
         factory = ListadoViewModelFactory(
@@ -41,7 +41,7 @@ fun Listado(navController: NavHostController, navegarAUsuario: (UsuarioEntity) -
             ListadoItem(
                 usuario = usuario,
                 fotoUsuario = fotoUsuario,
-                navegarAUsuario = navegarAUsuario
+                navController = navController
             )
         }
     }
