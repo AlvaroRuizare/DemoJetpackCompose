@@ -93,8 +93,8 @@ class LoginViewModel(private val usuarioDao: UsuarioDao, private val tiposUsuari
                 _estadoPrivado.value.valorCampoContrasena.trim(),
 
                 // PARA INICIAR SESION AUTOMATICAMENTE
-                // "admin",
-                // "admin"
+                 //"admin",
+                 //"admin"
             )){
                 navController.navigate(Pantallas.PantallaListado.route)
             } else {

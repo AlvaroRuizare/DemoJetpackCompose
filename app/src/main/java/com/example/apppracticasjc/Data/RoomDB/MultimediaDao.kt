@@ -13,5 +13,5 @@ interface MultimediaDao {
     suspend fun insert(multimedia: MultimediaEntity)
 
     @Query("SELECT ruta from multimedia WHERE idUsuario = :idUsuario")
-    fun getRuta(idUsuario: Int): String
+    suspend fun getRuta(idUsuario: Int): String
 }

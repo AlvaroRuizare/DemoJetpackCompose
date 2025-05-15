@@ -2,9 +2,9 @@ package com.example.apppracticasjc.Data.Model
 
 import android.net.Uri
 import androidx.compose.ui.focus.FocusState
-import com.example.apppracticasjc.R
 
 data class RegistroUiState(
+    var uriFotoPerfil: Uri = Uri.EMPTY,
     var valorCampoUsuario : String = "",
     var valorCampoContrasena : String = "",
     var valorCampoContrasena2 : String = "",
@@ -18,9 +18,5 @@ data class RegistroUiState(
     var listaTiposUsuario : List<String> = mutableListOf(),
 
     var mostrarDatePicker : Boolean = false,
-    var focoCampoFecha : FocusState? = null,
-
-    // FOTOS
-    var uriFotoPerfil: Uri? = Uri.EMPTY,
-    val painterPerfil: Int = R.drawable.login
+    var focoCampoFecha : FocusState? = null
 )

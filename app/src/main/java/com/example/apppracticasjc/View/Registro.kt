@@ -76,7 +76,8 @@ fun Registro(navController: NavHostController) {
     val registroViewModel : RegistroViewModel = viewModel( // ViewModel global que sobrevive a cambios de configuracion
         factory = RegistroViewModelFactory(
             BaseDatos.getDatabase(contexto).usuarioDao(),
-            BaseDatos.getDatabase(contexto).tipoUsuarioDao()
+            BaseDatos.getDatabase(contexto).tipoUsuarioDao(),
+            BaseDatos.getDatabase(contexto).multimediaDao(),
         )
     )
     val registroUiState by registroViewModel.estadoPublico.collectAsState()
@@ -92,8 +93,18 @@ fun Registro(navController: NavHostController) {
     // LAUNCHER IMAGE PICKER
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri ->
-            registroViewModel.actualizarUri(uri)
+        onResult = { uri -> // Se devuelve uri nullable
+            if (uri != null) { // Si la uri no es null (la funcion necesita que no lo sea)
+                registroViewModel.alEditarRegistro(
+                    uri,
+                    registroUiState.valorCampoUsuario,
+                    registroUiState.valorCampoContrasena,
+                    registroUiState.valorCampoContrasena2,
+                    registroUiState.valorCampoCorreo,
+                    registroUiState.valorCampoFecha,
+                    registroUiState.valorTipoUsuario
+                )
+            }
         }
     )
 
@@ -131,6 +142,7 @@ fun Registro(navController: NavHostController) {
         CampoFormulario(
             "Usuario",
             {registroViewModel.alEditarRegistro(
+                    registroUiState.uriFotoPerfil,
                     it,
                     registroUiState.valorCampoContrasena,
                     registroUiState.valorCampoContrasena2,
@@ -147,6 +159,7 @@ fun Registro(navController: NavHostController) {
         CampoFormulario(
             "Contraseña",
             {registroViewModel.alEditarRegistro(
+                registroUiState.uriFotoPerfil,
                 registroUiState.valorCampoUsuario,
                 it,
                 registroUiState.valorCampoContrasena2,
@@ -163,6 +176,7 @@ fun Registro(navController: NavHostController) {
         CampoFormulario(
             "Repetir contraseña",
             {registroViewModel.alEditarRegistro(
+                registroUiState.uriFotoPerfil,
                 registroUiState.valorCampoUsuario,
                 registroUiState.valorCampoContrasena,
                 it,
@@ -179,6 +193,7 @@ fun Registro(navController: NavHostController) {
         CampoFormulario(
             "Correo",
             {registroViewModel.alEditarRegistro(
+                registroUiState.uriFotoPerfil,
                 registroUiState.valorCampoUsuario,
                 registroUiState.valorCampoContrasena,
                 registroUiState.valorCampoContrasena2,
@@ -195,6 +210,7 @@ fun Registro(navController: NavHostController) {
         CampoDatePicker(
             "Fecha de Nacimiento",
             {registroViewModel.alEditarRegistro(
+                registroUiState.uriFotoPerfil,
                 registroUiState.valorCampoUsuario,
                 registroUiState.valorCampoContrasena,
                 registroUiState.valorCampoContrasena2,
@@ -209,6 +225,7 @@ fun Registro(navController: NavHostController) {
         DesplegableTiposUsuario(
             "Tipos de Usuario",
             {registroViewModel.alEditarRegistro(
+                registroUiState.uriFotoPerfil,
                 registroUiState.valorCampoUsuario,
                 registroUiState.valorCampoContrasena,
                 registroUiState.valorCampoContrasena2,

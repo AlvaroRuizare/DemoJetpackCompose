@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.apppracticasjc.Data.Model.RegistroUiState
+import com.example.apppracticasjc.Data.RoomDB.MultimediaDao
+import com.example.apppracticasjc.Data.RoomDB.MultimediaEntity
 import com.example.apppracticasjc.Data.RoomDB.TipoUsuarioDao
 import com.example.apppracticasjc.Data.RoomDB.UsuarioDao
 import com.example.apppracticasjc.Data.RoomDB.UsuarioEntity
@@ -23,7 +25,8 @@ import java.util.Locale
 
 class RegistroViewModel(
     private val usuarioDao: UsuarioDao,
-    private val tipoUsuarioDao: TipoUsuarioDao
+    private val tipoUsuarioDao: TipoUsuarioDao,
+    private val multimediaDao: MultimediaDao
 ) : ViewModel() {
 
     private val _estadoPrivado = MutableStateFlow(RegistroUiState())
@@ -61,6 +64,7 @@ class RegistroViewModel(
     fun pulsarCrearCuenta() {
         viewModelScope.launch {
             if(!camposValidos(
+                    _estadoPrivado.value.uriFotoPerfil,
                     _estadoPrivado.value.valorCampoUsuario,
                     _estadoPrivado.value.valorCampoContrasena,
                     _estadoPrivado.value.valorCampoContrasena2,
@@ -96,10 +100,20 @@ class RegistroViewModel(
                         tipoUsuarioAInt(_estadoPrivado.value.valorTipoUsuario)
                     )
                 )
+
+                multimediaDao.insert(
+                    MultimediaEntity(
+                        0,
+                        usuarioDao.getIdUsuario(_estadoPrivado.value.valorCampoUsuario),
+                        _estadoPrivado.value.uriFotoPerfil.toString()
+                    )
+                )
+
                 mostrarSnackbar("Usuario " + _estadoPrivado.value.valorCampoUsuario + " creado correctamente")
             }
         }
     }
+
 
     /**
      * Comprobar si ya existe nombre en BD
@@ -146,9 +160,10 @@ class RegistroViewModel(
     /**
      * Al escribir en el formulario de registro...
      */
-    fun alEditarRegistro(usuario: String, contrasena1: String, contrasena2: String, email: String, fecha: String, tipoUsuario: String) {
+    fun alEditarRegistro(uriFoto : Uri, usuario: String, contrasena1: String, contrasena2: String, email: String, fecha: String, tipoUsuario: String) {
         _estadoPrivado.update { estadoActual -> // Se actualizan todos los datos dinámicamente
             estadoActual.copy(
+                uriFotoPerfil = uriFoto,
                 valorCampoUsuario = usuario,
                 valorCampoContrasena = contrasena1,
                 valorCampoContrasena2 = contrasena2,
@@ -159,7 +174,7 @@ class RegistroViewModel(
         }
 
         // Si todos los campos son válidos...
-        if(camposValidos(usuario, contrasena1, contrasena2, email, fecha, tipoUsuario)){
+        if(camposValidos(uriFoto, usuario, contrasena1, contrasena2, email, fecha, tipoUsuario)){
             _estadoPrivado.update { estadoActual ->
                 estadoActual.copy(
                     botonHabilitado = true, // Se deshabilita el botón
@@ -190,12 +205,13 @@ class RegistroViewModel(
      * Comprobar si los campos son válidos
      */
     fun camposValidos(
-        usuario: String, contrasena1: String, contrasena2: String,
+        uriFoto: Uri, usuario: String, contrasena1: String, contrasena2: String,
         email: String, fecha: String, tipoUsuario: String
     ) : Boolean{
         var todoValido = true
 
-        if (!usuarioValido(usuario)) {
+        // AÑADIR IF AQUI CON EL MENSAJE DE QUE PASA SI NO HAY FOTO
+         if (!usuarioValido(usuario)) {
             todoValido = false
             _estadoPrivado.update { estadoActual ->
                 estadoActual.copy(
@@ -235,6 +251,14 @@ class RegistroViewModel(
                     textoError = "El tipo de usuario debe estar seleccionado"
                 )
             }
+        } else if (uriFoto == Uri.EMPTY) {
+            todoValido = false
+            _estadoPrivado.update { estadoActual ->
+                estadoActual.copy(
+                    botonHabilitado = false, // Se deshabilita el botón
+                    textoError = "La foto de perfil no puede estar vacía"
+                )
+            }
         }
 
         return todoValido
@@ -247,17 +271,5 @@ class RegistroViewModel(
     fun milisegundosAFecha(millis: Long): String {
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         return formatter.format(Date(millis))
-    }
-
-
-    /**
-     * Actualizar la uri de la foto de perfil al elegir imagen
-     */
-    fun actualizarUri(uri: Uri?) {
-        _estadoPrivado.update { estadoActual ->
-            estadoActual.copy(
-                uriFotoPerfil = uri
-            )
-        }
     }
 }

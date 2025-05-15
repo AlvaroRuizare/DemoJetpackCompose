@@ -43,4 +43,10 @@ interface UsuarioDao {
         SELECT correo from usuarios 
         WHERE correo = :correoRecibido""")
     suspend fun getExisteCorreo(correoRecibido : String): String?
+
+    @Query(
+        """
+        SELECT id from usuarios 
+        WHERE nombre = :nombreRecibido""")
+    suspend fun getIdUsuario(nombreRecibido : String): Int
 }
