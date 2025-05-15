@@ -3,7 +3,6 @@ package com.example.apppracticasjc.View
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -90,27 +89,31 @@ fun Registro(navController: NavHostController) {
         }
     }
 
-    // LAUNCHER IMAGE PICKER
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> // Se devuelve uri nullable
-            if (uri != null) { // Si la uri no es null (la funcion necesita que no lo sea)
-                registroViewModel.alEditarRegistro(
-                    uri,
-                    registroUiState.valorCampoUsuario,
-                    registroUiState.valorCampoContrasena,
-                    registroUiState.valorCampoContrasena2,
-                    registroUiState.valorCampoCorreo,
-                    registroUiState.valorCampoFecha,
-                    registroUiState.valorTipoUsuario
-                )
+
+    // LAUNCHER GALERIA
+    val galeriaLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                val ruta = registroViewModel.copiarImagenAPrivado(contexto, it)
+                ruta?.let { rutaNoNull ->
+                    registroViewModel.alEditarRegistro(
+                        rutaNoNull,
+                        registroUiState.valorCampoUsuario,
+                        registroUiState.valorCampoContrasena,
+                        registroUiState.valorCampoContrasena2,
+                        registroUiState.valorCampoCorreo,
+                        registroUiState.valorCampoFecha,
+                        registroUiState.valorTipoUsuario
+                    )
+                }
             }
         }
     )
 
-    // Si el uriState no esta vacio
-    val painter = if (registroUiState.uriFotoPerfil != Uri.EMPTY) {
-        rememberAsyncImagePainter(registroUiState.uriFotoPerfil)
+    // Si la ruta no esta vacia
+    val painter = if (registroUiState.rutaFotoPerfil.isNotEmpty()) {
+        rememberAsyncImagePainter(registroUiState.rutaFotoPerfil)
     } else { // Si el uriState esta vacio
         painterResource(id = R.drawable.login2)
     }
@@ -126,9 +129,7 @@ fun Registro(navController: NavHostController) {
         FotoPerfil(
             modifier = Modifier
                 .clickable {
-                    imagePickerLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                    )
+                    galeriaLauncher.launch("image/*")
                 }
                 .padding(16.dp, 8.dp),
             painter = painter
@@ -142,7 +143,7 @@ fun Registro(navController: NavHostController) {
         CampoFormulario(
             "Usuario",
             {registroViewModel.alEditarRegistro(
-                    registroUiState.uriFotoPerfil,
+                    registroUiState.rutaFotoPerfil,
                     it,
                     registroUiState.valorCampoContrasena,
                     registroUiState.valorCampoContrasena2,
@@ -159,7 +160,7 @@ fun Registro(navController: NavHostController) {
         CampoFormulario(
             "Contraseña",
             {registroViewModel.alEditarRegistro(
-                registroUiState.uriFotoPerfil,
+                registroUiState.rutaFotoPerfil,
                 registroUiState.valorCampoUsuario,
                 it,
                 registroUiState.valorCampoContrasena2,
@@ -176,7 +177,7 @@ fun Registro(navController: NavHostController) {
         CampoFormulario(
             "Repetir contraseña",
             {registroViewModel.alEditarRegistro(
-                registroUiState.uriFotoPerfil,
+                registroUiState.rutaFotoPerfil,
                 registroUiState.valorCampoUsuario,
                 registroUiState.valorCampoContrasena,
                 it,
@@ -193,7 +194,7 @@ fun Registro(navController: NavHostController) {
         CampoFormulario(
             "Correo",
             {registroViewModel.alEditarRegistro(
-                registroUiState.uriFotoPerfil,
+                registroUiState.rutaFotoPerfil,
                 registroUiState.valorCampoUsuario,
                 registroUiState.valorCampoContrasena,
                 registroUiState.valorCampoContrasena2,
@@ -210,7 +211,7 @@ fun Registro(navController: NavHostController) {
         CampoDatePicker(
             "Fecha de Nacimiento",
             {registroViewModel.alEditarRegistro(
-                registroUiState.uriFotoPerfil,
+                registroUiState.rutaFotoPerfil,
                 registroUiState.valorCampoUsuario,
                 registroUiState.valorCampoContrasena,
                 registroUiState.valorCampoContrasena2,
@@ -225,7 +226,7 @@ fun Registro(navController: NavHostController) {
         DesplegableTiposUsuario(
             "Tipos de Usuario",
             {registroViewModel.alEditarRegistro(
-                registroUiState.uriFotoPerfil,
+                registroUiState.rutaFotoPerfil,
                 registroUiState.valorCampoUsuario,
                 registroUiState.valorCampoContrasena,
                 registroUiState.valorCampoContrasena2,

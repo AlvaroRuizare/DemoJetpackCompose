@@ -1,5 +1,6 @@
 package com.example.apppracticasjc.ViewModel
 
+import android.content.Context
 import android.net.Uri
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
@@ -19,6 +20,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -64,7 +67,7 @@ class RegistroViewModel(
     fun pulsarCrearCuenta() {
         viewModelScope.launch {
             if(!camposValidos(
-                    _estadoPrivado.value.uriFotoPerfil,
+                    _estadoPrivado.value.rutaFotoPerfil,
                     _estadoPrivado.value.valorCampoUsuario,
                     _estadoPrivado.value.valorCampoContrasena,
                     _estadoPrivado.value.valorCampoContrasena2,
@@ -105,13 +108,55 @@ class RegistroViewModel(
                     MultimediaEntity(
                         0,
                         usuarioDao.getIdUsuario(_estadoPrivado.value.valorCampoUsuario),
-                        _estadoPrivado.value.uriFotoPerfil.toString()
+                        _estadoPrivado.value.rutaFotoPerfil
                     )
                 )
 
                 mostrarSnackbar("Usuario " + _estadoPrivado.value.valorCampoUsuario + " creado correctamente")
             }
         }
+    }
+
+
+    /**
+     * Copiar imagen seleccionada en el almacenamiento privado de la app
+     * y devolver la ruta de la copia
+     *
+     * @param context Contexto de la aplicación
+     * @param uri URI de la imagen seleccionada
+     * @return Ruta de la copia del archivo, o null en caso de fallo
+     */
+    fun copiarImagenAPrivado(context: Context, uri: Uri): String? {
+        var ruta: String? = null
+
+        try {
+            // Abrir un InputStream que recibe los datos de la foto seleccionada mediante su uri
+            val inputStream = context.contentResolver.openInputStream(uri)
+
+            // Crear un nombre único para el archivo usando timestamp
+            val nombreArchivoCopia = "imagen_${System.currentTimeMillis()}.jpg"
+
+            // Crear el archivo en el almacenamiento interno privado de la app
+            val archivo = File(context.filesDir, nombreArchivoCopia)
+
+            // Crear un OutputStream hacia ese archivo
+            val outputStream = FileOutputStream(archivo)
+
+            // Copiar el contenido del InputStream al OutputStream para crear el nuevo archivo
+            inputStream?.copyTo(outputStream)
+
+            // Cerrar los streams para liberar recursos
+            inputStream?.close()
+            outputStream.close()
+
+            // Guardar y devolver la ruta absoluta del archivo copiado
+            ruta = archivo.absolutePath
+        } catch (e: Exception) {
+            // Imprimir el error en caso de fallo (por ejemplo, si no se puede acceder al URI)
+            e.printStackTrace()
+        }
+
+        return ruta
     }
 
 
@@ -160,10 +205,10 @@ class RegistroViewModel(
     /**
      * Al escribir en el formulario de registro...
      */
-    fun alEditarRegistro(uriFoto : Uri, usuario: String, contrasena1: String, contrasena2: String, email: String, fecha: String, tipoUsuario: String) {
+    fun alEditarRegistro(rutaFoto : String, usuario: String, contrasena1: String, contrasena2: String, email: String, fecha: String, tipoUsuario: String) {
         _estadoPrivado.update { estadoActual -> // Se actualizan todos los datos dinámicamente
             estadoActual.copy(
-                uriFotoPerfil = uriFoto,
+                rutaFotoPerfil = rutaFoto,
                 valorCampoUsuario = usuario,
                 valorCampoContrasena = contrasena1,
                 valorCampoContrasena2 = contrasena2,
@@ -174,7 +219,7 @@ class RegistroViewModel(
         }
 
         // Si todos los campos son válidos...
-        if(camposValidos(uriFoto, usuario, contrasena1, contrasena2, email, fecha, tipoUsuario)){
+        if(camposValidos(rutaFoto, usuario, contrasena1, contrasena2, email, fecha, tipoUsuario)){
             _estadoPrivado.update { estadoActual ->
                 estadoActual.copy(
                     botonHabilitado = true, // Se deshabilita el botón
@@ -205,7 +250,7 @@ class RegistroViewModel(
      * Comprobar si los campos son válidos
      */
     fun camposValidos(
-        uriFoto: Uri, usuario: String, contrasena1: String, contrasena2: String,
+        rutaFoto: String, usuario: String, contrasena1: String, contrasena2: String,
         email: String, fecha: String, tipoUsuario: String
     ) : Boolean{
         var todoValido = true
@@ -251,7 +296,7 @@ class RegistroViewModel(
                     textoError = "El tipo de usuario debe estar seleccionado"
                 )
             }
-        } else if (uriFoto == Uri.EMPTY) {
+        } else if (rutaFoto.isEmpty()) {
             todoValido = false
             _estadoPrivado.update { estadoActual ->
                 estadoActual.copy(

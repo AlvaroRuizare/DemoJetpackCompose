@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
@@ -35,7 +34,7 @@ fun ListadoItem(
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer)
     ) {
         Row (
-            modifier = Modifier.fillMaxWidth().height(125.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -43,7 +42,7 @@ fun ListadoItem(
                 painter = rememberAsyncImagePainter(fotoUsuario),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(80.dp))
+                modifier = Modifier.size(100.dp))
             Column (
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -51,23 +50,23 @@ fun ListadoItem(
                 Text(
                     text = usuario.nombre,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Correo: ${usuario.correo}",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier
                 )
                 Text(
                     text = "Fecha nac.: ${usuario.fechaNacimiento}",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier
                 )
                 Text(
                     text = "Tipo: ${usuario.idTipoUsuario}",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier
                 )
             }
 

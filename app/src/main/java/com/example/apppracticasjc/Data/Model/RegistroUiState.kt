@@ -1,10 +1,9 @@
 package com.example.apppracticasjc.Data.Model
 
-import android.net.Uri
 import androidx.compose.ui.focus.FocusState
 
 data class RegistroUiState(
-    var uriFotoPerfil: Uri = Uri.EMPTY,
+    var rutaFotoPerfil: String = "",
     var valorCampoUsuario : String = "",
     var valorCampoContrasena : String = "",
     var valorCampoContrasena2 : String = "",
