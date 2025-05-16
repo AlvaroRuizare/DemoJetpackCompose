@@ -1,7 +1,6 @@
 package com.example.apppracticasjc.View
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,17 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.apppracticasjc.Data.RoomDB.UsuarioEntity
-import com.example.apppracticasjc.Navigation.Pantallas
 
 @Composable
 fun ListadoItem(
-    usuario: UsuarioEntity,
+    usuarioItem: UsuarioEntity,
     fotoUsuario: String,
-    navController: NavController,
-    tipoUsuario: String
+    tipoUsuario: String,
+    alSeleccionar : (usuarioItem : UsuarioEntity, seleccionado : Boolean) -> Unit
 ) {
     Card (
         modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
@@ -48,24 +45,24 @@ fun ListadoItem(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(100.dp)
-                    .clickable { navController.navigate(Pantallas.PantallaCarouselGaleria.route)})
+            )
             Column (
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
                 Text(
-                    text = usuario.nombre,
+                    text = usuarioItem.nombre,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Correo: ${usuario.correo}",
+                    text = "Correo: ${usuarioItem.correo}",
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier
                 )
                 Text(
-                    text = "Fecha nac.: ${usuario.fechaNacimiento}",
+                    text = "Fecha nac.: ${usuarioItem.fechaNacimiento}",
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier
                 )
@@ -77,8 +74,8 @@ fun ListadoItem(
             }
 
             Checkbox(
-                false,
-                onCheckedChange = {  },
+                checked = usuarioItem.estaSeleccionado,
+                onCheckedChange = { alSeleccionar(usuarioItem, it) }
             )
         }
     }

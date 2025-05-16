@@ -1,15 +1,10 @@
 package com.example.apppracticasjc.View
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.carousel.HorizontalUncontainedCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
@@ -31,8 +26,8 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CarouselGaleria(){
-    var contexto = LocalContext.current
-    var multimediaDao = BaseDatos.getDatabase(contexto).multimediaDao()
+    val contexto = LocalContext.current
+    val multimediaDao = BaseDatos.getDatabase(contexto).multimediaDao()
 
     var listaFotos by remember { mutableStateOf(listOf<MultimediaEntity>()) }
 
@@ -48,7 +43,7 @@ fun CarouselGaleria(){
         },
         itemWidth = 400.dp,
         itemSpacing = 15.dp,
-        modifier = Modifier.fillMaxHeight()
+        modifier = Modifier.height(500.dp)
     ) { index ->
         val value =listaFotos[index].ruta
 

@@ -3,6 +3,7 @@ package com.example.apppracticasjc.Data.RoomDB
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 // El entity es donde se crea la tabla de base de datos
@@ -12,7 +13,7 @@ import androidx.room.PrimaryKey
                             parentColumns = ["id"],
                             childColumns = ["idTipoUsuario"],
                             onDelete = ForeignKey.SET_NULL)])
-data class UsuarioEntity(
+data class UsuarioEntity (
     @PrimaryKey(autoGenerate = true)
     val id : Int = 0,
 
@@ -27,5 +28,9 @@ data class UsuarioEntity(
     val idTipoUsuario : Int,
 
     @ColumnInfo(defaultValue = "0")
-    val deBaja : Int = 0
-)
+    val deBaja : Int = 0,
+
+) {
+    @Ignore
+    var estaSeleccionado : Boolean = false
+}

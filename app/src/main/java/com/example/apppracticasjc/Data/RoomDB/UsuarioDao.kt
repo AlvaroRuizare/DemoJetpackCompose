@@ -25,7 +25,7 @@ interface UsuarioDao {
     fun getUsuario(id: Int): Flow<UsuarioEntity>
 
     @Query("SELECT * from usuarios")
-    fun getAllUsuarios(): Flow<List<UsuarioEntity>>
+    suspend fun getAllUsuarios(): List<UsuarioEntity>
 
     @Query("""
         SELECT * from usuarios 
