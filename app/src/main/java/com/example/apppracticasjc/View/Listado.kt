@@ -22,6 +22,7 @@ fun Listado(navController: NavHostController) {
     val listadoViewModel : ListadoViewModel = viewModel( // ViewModel global que sobrevive a cambios de configuracion
         factory = ListadoViewModelFactory(
             BaseDatos.getDatabase(context).usuarioDao(),
+            BaseDatos.getDatabase(context).tipoUsuarioDao(),
             BaseDatos.getDatabase(context).multimediaDao())
     )
     val listadoUiState by listadoViewModel.estadoPublico.collectAsState()
@@ -38,10 +39,15 @@ fun Listado(navController: NavHostController) {
                 value = listadoViewModel.obtenerFotoUsuario(usuario.id)
             }
 
+            val nombreTipoUsuario by produceState(initialValue = "") {
+                value = listadoViewModel.obtenerNombreTipoUsuario(usuario.idTipoUsuario)
+            }
+
             ListadoItem(
                 usuario = usuario,
                 fotoUsuario = fotoUsuario,
-                navController = navController
+                navController = navController,
+                tipoUsuario = nombreTipoUsuario
             )
         }
     }

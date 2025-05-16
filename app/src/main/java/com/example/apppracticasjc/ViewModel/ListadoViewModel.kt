@@ -3,6 +3,7 @@ package com.example.apppracticasjc.ViewModel
 import androidx.lifecycle.ViewModel
 import com.example.apppracticasjc.Data.Model.ListadoUiState
 import com.example.apppracticasjc.Data.RoomDB.MultimediaDao
+import com.example.apppracticasjc.Data.RoomDB.TipoUsuarioDao
 import com.example.apppracticasjc.Data.RoomDB.UsuarioDao
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class ListadoViewModel(
     private val usuarioDao: UsuarioDao,
+    private val tipoUsuarioDao: TipoUsuarioDao,
     private val multimediaDao: MultimediaDao
 ) : ViewModel(){
     private val _estadoPrivado = MutableStateFlow(ListadoUiState(listaUsuarios = usuarioDao.getAllUsuarios()))
@@ -21,5 +23,9 @@ class ListadoViewModel(
 
     suspend fun obtenerFotoUsuario(idUsuario : Int) : String {
         return multimediaDao.getRuta(idUsuario)
+    }
+
+    suspend fun obtenerNombreTipoUsuario(idTipoUsuario : Int) : String {
+        return tipoUsuarioDao.getNombreTipoUsuario(idTipoUsuario)
     }
 }

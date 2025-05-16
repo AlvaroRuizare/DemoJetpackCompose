@@ -28,13 +28,14 @@ import com.example.apppracticasjc.Navigation.Pantallas
 fun ListadoItem(
     usuario: UsuarioEntity,
     fotoUsuario: String,
-    navController: NavController
+    navController: NavController,
+    tipoUsuario: String
 ) {
     Card (
         modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer)
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
     ) {
         Row (
             modifier = Modifier.fillMaxWidth(),
@@ -69,7 +70,7 @@ fun ListadoItem(
                     modifier = Modifier
                 )
                 Text(
-                    text = "Tipo: ${usuario.idTipoUsuario}",
+                    text = "Tipo: $tipoUsuario",
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier
                 )

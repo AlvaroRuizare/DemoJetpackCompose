@@ -16,6 +16,9 @@ interface TipoUsuarioDao {
     @Query("SELECT * from tiposusuario WHERE id = :id")
     fun getTipoUsuario(id: Int): Flow<TipoUsuarioEntity>
 
+    @Query("SELECT tipoUsuario from tiposusuario WHERE id = :id")
+    suspend fun getNombreTipoUsuario(id: Int): String
+
     @Query("SELECT tipoUsuario from tiposusuario")
     suspend fun getAllTiposUsuario(): List<String>
 }
